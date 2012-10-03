@@ -8,6 +8,7 @@ import pygame
 from pygame.locals import *
 from pygame.sprite import Sprite
 
+from assets.lib import util
 from assets.lib.euclid import *
 
 
@@ -16,32 +17,13 @@ SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
 BG_COLOR = 150, 150, 80
 
 
-def load_image(name, colorkey=None, pngTransparency=None):
-    fullname = os.path.join('assets/images/', name)
-    try:
-        image = pygame.image.load(fullname)
-    except pygame.error, message:
-        print 'Cannot load image:', name
-        raise SystemExit, message
-        
-    if colorkey is not None:
-        image = image.convert()
-        if colorkey is -1:
-            colorkey = image.get_at((0,0))
-        image.set_colorkey(colorkey, RLEACCEL)
-    elif pngTransparency is not None:
-        image = image.convert_alpha()
-        
-    return image, image.get_rect()
-
-
-class Whitey(Sprite):
+class Leuk(Sprite):
 
     def __init__(self, screen, startx, starty):
         Sprite.__init__(self)
 
-        self.image, self.rect = load_image('bluecreep.png', -1)
-        self.target_image, self.target_rect = load_image('graycreep.png', -1)
+        self.image, self.rect = util.load_image('bluecreep.png', -1)
+        self.target_image, self.target_rect = util.load_image('graycreep.png', -1)
         self.screen = screen
         self.pos = Vector2(startx, starty)
         self.targets = {}
@@ -130,7 +112,7 @@ def run_game():
     clock = pygame.time.Clock()
     startx = SCREEN_WIDTH / 2
     starty = SCREEN_HEIGHT / 2
-    whitey = Whitey(screen, startx, starty)
+    our_hero = Leuk(screen, startx, starty)
 
     while True:
         time_passed = clock.tick(60)
@@ -144,8 +126,8 @@ def run_game():
         # Redraw the background
         screen.fill(BG_COLOR)
         
-        whitey.update(time_passed)
-        whitey.blitme()
+        our_hero.update(time_passed)
+        our_hero.blitme()
 
         pygame.display.flip()
 
