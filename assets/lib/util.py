@@ -1,6 +1,7 @@
 import sys, os, pygame
 from pygame.locals import *
 
+from settings import *
 
 def load_image(name, colorkey=None, pngTransparency=None):
     fullname = os.path.join('assets/images/', name)
@@ -19,3 +20,7 @@ def load_image(name, colorkey=None, pngTransparency=None):
         image = image.convert_alpha()
         
     return image, image.get_rect()
+
+def debug_print(text):
+    if DEBUG:
+        print text
