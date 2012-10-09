@@ -1,38 +1,137 @@
-#!/usr/bin/python
+from cocos.director import director
+from cocos.layer import *
+from cocos.scene import Scene
+from cocos.scenes.transitions import *
+from cocos.actions import *
+from cocos.sprite import *
+from cocos.menu import *
+from cocos.text import *
 
-import os, sys
+import pyglet
+from pyglet import gl, font
+from pyglet.window import key
 
-import pygame
-from pygame.locals import *
+from settings import Settings
 
-from Leuk import Leuk
-
-from settings import *
-
-def run_game():
-    pygame.init()
-    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
-    clock = pygame.time.Clock()
-    startx = SCREEN_WIDTH / 2
-    starty = SCREEN_HEIGHT / 2
-    our_hero = Leuk(screen, startx, starty)
-
-    while True:
-        time_passed = clock.tick(60)
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                sys.exit()
-            if event.type == KEYDOWN:
-                if(event.key == K_ESCAPE):
-                    sys.exit()
-        
-        # Redraw the background
-        screen.fill(BG_COLOR)
-        
-        our_hero.update(time_passed)
-        our_hero.blit_my_bits()
-
-        pygame.display.flip()
+# from HUD import BackgroundLayer
+# import soundex
+# import hiscore
 
 
-run_game()
+class MainMenu(Menu):
+
+    def __init__(self):
+        super(MainMenu, self).__init__('Cool Hand Leukocyte') 
+
+        # self.select_sound = soundex.load('move.mp3')
+
+        # you can override the font that will be used for the title and the items
+        # you can also override the font size and the colors. see menu.py for
+        # more info
+        self.font_title['font_name'] = 'Edit Undo Line BRK'
+        self.font_title['font_size'] = 72
+        self.font_title['color'] = (204,164,164,255)
+
+        self.font_item['font_name'] = 'Edit Undo Line BRK',
+        self.font_item['color'] = (32,16,32,255)
+        self.font_item['font_size'] = 32
+        self.font_item_selected['font_name'] = 'Edit Undo Line BRK'
+        self.font_item_selected['color'] = (32,16,32,255)
+        self.font_item_selected['font_size'] = 46
+
+
+        # example: menus can be vertical aligned and horizontal aligned
+        self.menu_anchor_y = CENTER
+        self.menu_anchor_x = CENTER
+
+        items = []
+
+        items.append( MenuItem('New Game', self.on_new_game) )
+        items.append( MenuItem('Options', self.on_options) )
+        items.append( MenuItem('Quit', self.on_quit) )
+
+        self.create_menu( items, shake(), shake_back() )
+
+    def on_new_game(self):
+        import game_view
+        director.push(FlipAngular3DTransition(game_view.get_newgame(), 1.5))
+
+    def on_options( self ):
+        self.parent.switch_to(1)
+
+    def on_quit(self):
+        pyglet.app.exit()
+
+class OptionsMenu( Menu ):
+    def __init__(self):
+        super( OptionsMenu, self).__init__('Cool Hand Leukocyte') 
+        # self.select_sound = soundex.load('move.mp3')
+
+        # you can override the font that will be used for the title and the items
+        self.font_title['font_name'] = 'Edit Undo Line BRK'
+        self.font_title['font_size'] = 72
+        self.font_title['color'] = (204,164,164,255)
+
+        self.font_item['font_name'] = 'Edit Undo Line BRK',
+        self.font_item['color'] = (32,16,32,255)
+        self.font_item['font_size'] = 32
+        self.font_item_selected['font_name'] = 'Edit Undo Line BRK'
+        self.font_item_selected['color'] = (32,16,32,255)
+        self.font_item_selected['font_size'] = 46
+
+        # you can also override the font size and the colors. see menu.py for
+        # more info
+
+        # example: menus can be vertical aligned and horizontal aligned
+        self.menu_anchor_y = CENTER
+        self.menu_anchor_x = CENTER
+
+        items = []
+
+        # self.volumes = ['Mute','10','20','30','40','50','60','70','80','90','100']
+
+        # items.append( MultipleMenuItem(
+        #                 'SFX volume: ', 
+        #                 self.on_sfx_volume,
+        #                 self.volumes,
+        #                 int(soundex.sound_vol * 10) )
+        #             )
+        # items.append( MultipleMenuItem(
+        #                 'Music volume: ', 
+        #                 self.on_music_volume,
+        #                 self.volumes,
+        #                 int(soundex.music_player.volume * 10) )
+        #             )
+        items.append( ToggleMenuItem('Show FPS:', self.on_show_fps, director.show_FPS) )
+        items.append( MenuItem('Fullscreen', self.on_fullscreen) )
+        items.append( MenuItem('Back', self.on_quit) )
+        self.create_menu( items, shake(), shake_back() )
+
+    def on_fullscreen( self ):
+        director.window.set_fullscreen( not director.window.fullscreen )
+
+    def on_quit( self ):
+        self.parent.switch_to( 0 )
+
+    def on_show_fps( self, value ):
+        director.show_FPS = value
+
+    # def on_sfx_volume( self, idx ):
+    #     vol = idx / 10.0
+    #     soundex.sound_volume( vol )
+
+    # def on_music_volume( self, idx ):
+    #     vol = idx / 10.0
+    #     soundex.music_volume( vol )
+
+if __name__ == "__main__":
+
+    settings = Settings()
+
+    font.add_directory('assets/fonts/')
+
+    director.init(resizable=False, width=settings.screen_width, height=settings.screen_height)
+    scene = Scene()
+    scene.add(MultiplexLayer(MainMenu(), OptionsMenu()), z=1) 
+    # scene.add( BackgroundLayer(), z=0 )
+    director.run(scene)

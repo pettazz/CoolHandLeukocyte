@@ -1,6 +1,10 @@
-# Game parameters
-SCREEN_WIDTH, SCREEN_HEIGHT = 1024, 768
-BG_COLOR = 175, 30, 30
 
-DEBUG = True
+__all__ = [ 'settings' ]
 
+class Settings():
+    def __init__(self):
+        self.screen_width = 1024
+        self.screen_height = 768
+        self.debug = False
+
+settings = Settings()
